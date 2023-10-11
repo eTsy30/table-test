@@ -3,7 +3,6 @@ import { Table } from './components/Table/Table'
 import { store } from './Store/store'
 
 import { useAppDispatch, useAppSelector } from './Store/Hooks/hook'
-import { setBurgerActive } from './Store/Slice/TableSlice'
 import { Provider } from 'react-redux'
 
 export default function App() {
@@ -16,19 +15,9 @@ export default function App() {
   )
 }
 function MainContent() {
-  const dispatch = useAppDispatch()
-  const message = useAppSelector((state) => state.isActiveBurger.value)
-
-  const handlePress = () => {
-    dispatch(setBurgerActive(!message))
-    console.log('we')
-  }
-  console.log(message)
-
   return (
     <View style={styles.container}>
-      {message && <Table />}
-      <Button title={'Установить сообщение'} onPress={handlePress} />
+      <Table />
     </View>
   )
 }

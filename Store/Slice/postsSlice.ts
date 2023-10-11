@@ -1,10 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 export interface IPost {
-  userId: number
-  id: number
-  title: string
-  body: string
+  data: Array<{ userId: number; id: number; title: string; body: string }>
 }
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   const response = await axios.get('https://jsonplaceholder.typicode.com/posts')
@@ -13,10 +10,7 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   return response.data
 })
 const initialState: IPost = {
-  userId: 0,
-  id: 0,
-  title: '',
-  body: '',
+  data: [],
 }
 const postsSlice = createSlice({
   name: 'posts',
@@ -24,7 +18,7 @@ const postsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchPosts.fulfilled, (state: IPost, action) => {
-      state.body = action.payload
+      state.data = action.payload
     })
   },
 })
