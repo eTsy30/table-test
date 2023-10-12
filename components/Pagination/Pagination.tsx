@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Button, Text } from 'react-native'
+import { View, Button, Text, TouchableOpacity, StyleSheet } from 'react-native'
 
 interface PaginationProps {
   currentPage: number
@@ -102,30 +102,50 @@ const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <View
-      style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10,
+        alignItems: 'center',
+        gap: 10,
+      }}
     >
-      <Button
-        title="< Previous"
+      <TouchableOpacity
+        style={styles.button}
         onPress={handlePrevPage}
         disabled={currentPage < 2}
-      />
-      {currentPage <= lastPage + 2 || (
+      >
+        Назад
+      </TouchableOpacity>
+
+      {currentPage <= firstPage + 2 || (
         <Button title="1" onPress={() => handleGoToPage(1)} />
       )}
       {renderPagination()}
       {currentPage >= lastPage - 2 || (
         <Button
-          title={lastPage.toString()}
           onPress={() => handleGoToPage(lastPage)}
+          title={lastPage.toString()}
         />
       )}
-      <Button
-        title="Next >"
-        onPress={handleNextPage}
+      <TouchableOpacity
+        style={styles.button}
         disabled={currentPage === totalPages}
-      />
+        onPress={handleNextPage}
+      >
+        <Text style={{ color: 'black' }}>Далее</Text>
+      </TouchableOpacity>
     </View>
   )
 }
-
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    color: 'blue',
+  },
+  green: {
+    color: 'green',
+  },
+})
 export default Pagination

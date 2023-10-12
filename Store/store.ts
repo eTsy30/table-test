@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-import getPostsSlice from './Slice/getPostsSlice'
+import postsSlice from './Slice/postsSlice'
 
 export const store = configureStore({
   reducer: {
-    getPostsSlice,
+    postsSlice,
   },
 })
 export type RootState = ReturnType<typeof store.getState>

@@ -13,13 +13,20 @@ import { RootState } from '../../Store/store'
 import { useAppDispatch } from '../../Store/Hooks/hook'
 
 import Pagination from '../Pagination/Pagination'
-import { IPost, fetchPosts } from '../../Store/Slice/getPostsSlice'
+import {
+  fetchPosts,
+  setData,
+  setSearchData,
+  setSortData,
+} from '../../Store/Slice/postsSlice'
 
 export const Table = () => {
   const dispatch = useAppDispatch()
-  const [displayedData, setDisplayedData] = useState<any>([])
-  const [sortConfig, setSortConfig] = useState<any>({
-    key: null,
+  const [sortConfig, setSortConfig] = useState<{
+    key: string | null
+    direction: 'ascending' | 'descending'
+  }>({
+    key: 'null',
     direction: 'ascending',
   })
 
@@ -27,17 +34,17 @@ export const Table = () => {
     dispatch(fetchPosts())
   }, [])
 
-  const posts = useSelector((state: RootState) => state.getPostsSlice)
-
+  const posts = useSelector((state: RootState) => state.postsSlice)
   const firstObjectKeys = posts.data[0] && Object.keys(posts.data[0])
   const itemsPerPage = 10
   const [currentPage, setCurrentPage] = useState(1)
   const [searchText, setSearchText] = useState('')
+  console.log(posts)
 
   useEffect(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = currentPage * itemsPerPage
-    setDisplayedData(posts.data.slice(startIndex, endIndex))
+    dispatch(setData(posts.data.slice(startIndex, endIndex)))
   }, [currentPage, posts.data])
 
   const totalPages = Math.ceil(posts.data.length / itemsPerPage)
@@ -47,69 +54,69 @@ export const Table = () => {
   }
 
   const handleSearch = () => {
-    const filteredData = displayedData.filter(
-      (item: IPost) =>
-        item.body.includes(searchText) || item.title.includes(searchText)
-    )
-    setDisplayedData(filteredData)
+    dispatch(setSearchData(searchText))
   }
 
-  const requestSort = (key: string) => {
-    let direction = 'ascending'
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending'
+  const handleSort = (key: string) => {
+    let direction: 'ascending' | 'descending' = 'ascending'
+
+    if (sortConfig.key === key) {
+      direction =
+        sortConfig.direction === 'ascending' ? 'descending' : 'ascending'
     }
+
     setSortConfig({ key, direction })
-  }
-
-  const getClassNamesFor = (name: string) => {
-    if (!sortConfig) {
-      return
-    }
-    return sortConfig.key === name ? sortConfig.direction : undefined
-  }
-
-  const sortedData = [...displayedData]
-
-  if (sortConfig.key) {
-    sortedData.sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === 'ascending' ? -1 : 1
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === 'ascending' ? 1 : -1
-      }
-      return 0
-    })
+    const sortedKey = key as 'id' | 'title' | 'body'
+    dispatch(
+      setSortData({
+        key: sortedKey,
+        direction,
+        displayedData: posts.displayedData,
+      })
+    )
   }
 
   return (
     <View>
-      <TextInput
-        placeholder="Search"
-        value={searchText}
-        onChangeText={setSearchText}
-        style={{ borderWidth: 1, borderColor: 'gray', marginBottom: 10 }}
-      />{' '}
-      <Button title="Search" onPress={handleSearch} />
+      <View style={styles.searchContainer}>
+        <TextInput
+          placeholder="Поиск"
+          value={searchText}
+          onChangeText={setSearchText}
+          style={styles.input}
+        />
+        <Button
+          title="Search"
+          onPress={handleSearch}
+          color={'rgb(128, 128, 128)'}
+        />
+      </View>
       <FlatList
-        data={sortedData}
+        data={posts.displayedData}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={
-          <View style={{ backgroundColor: 'black', flexDirection: 'row' }}>
+          <View
+            style={{
+              backgroundColor: 'rgb(66, 66, 66)',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+          >
             {firstObjectKeys &&
               firstObjectKeys.map((key, index) => (
                 <TouchableOpacity
                   style={[
                     styles.cell,
-                    index === firstObjectKeys.length - 1 && { flex: 5 },
+                    index === firstObjectKeys.length - 1 && { flex: 10 },
+                    index === 1 && { flex: 3 },
                   ]}
                   key={key}
-                  onPress={() => requestSort(key)}
+                  onPress={() => handleSort(key)}
                 >
                   <Text style={[styles.cellText, { color: 'white' }]}>
                     {key}
-                    {getClassNamesFor(key) === 'ascending' ? ' ↑' : ' ↓'}
+                    {sortConfig.key === key &&
+                      (sortConfig.direction === 'ascending' ? ' ↑' : ' ↓')}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -117,16 +124,13 @@ export const Table = () => {
         }
         renderItem={({ item }) => (
           <View style={styles.row}>
-            <View style={styles.cell}>
-              <Text style={[styles.cellText, { flex: 0 }]}>{item.userId}</Text>
-            </View>
-            <View style={styles.cell}>
+            <View style={[styles.cell, { flex: 1 }]}>
               <Text style={styles.cellText}>{item.id}</Text>
             </View>
-            <View style={styles.cell}>
+            <View style={[styles.cell, { flex: 3 }]}>
               <Text style={styles.cellText}>{item.title}</Text>
             </View>
-            <View style={[styles.cell, { flex: 5 }]}>
+            <View style={[styles.cell, { flex: 10 }]}>
               <Text style={styles.cellText}>{item.body}</Text>
             </View>
           </View>
@@ -146,7 +150,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   cell: {
-    borderColor: 'black',
+    borderColor: 'rgb(66, 66, 66)',
     flex: 1,
     padding: 10,
     borderWidth: 1,
@@ -154,5 +158,22 @@ const styles = StyleSheet.create({
   },
   cellText: {
     textAlign: 'center',
+  },
+  searchContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    marginBottom: 10,
+    width: '60%',
+    padding: 10,
+    backgroundColor: 'grey',
+  },
+  input: {
+    width: '100%',
+    height: 35,
+    padding: 5,
+    color: 'white',
+  },
+  buttonSearch: {
+    backgroundColor: 'rgb(128, 128, 128)',
   },
 })

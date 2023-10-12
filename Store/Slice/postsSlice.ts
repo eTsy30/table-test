@@ -1,61 +1,81 @@
-// import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-// import { IPost } from './getPostsSlice'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-// interface PostsState {
-//   data: IPost[]
-//   displayedData: IPost[]
-//   sortConfig: {
-//     key: string | null
-//     direction: 'ascending' | 'descending'
-//   }
-// }
+import axios from 'axios'
 
-// const initialState: PostsState = {
-//   data: [],
-//   displayedData: [],
-//   sortConfig: {
-//     key: null,
-//     direction: 'ascending',
-//   },
-// }
+interface PostsState {
+  data: IPost[]
+  displayedData: IPost[]
+  sortConfig: ISetSortDataPayload
+}
+export interface ISetSortDataPayload {
+  key: 'id' | 'title' | 'body'
+  direction: 'ascending' | 'descending'
+  displayedData: IPost[]
+}
+const initialState: PostsState = {
+  data: [],
+  displayedData: [],
+  sortConfig: {
+    direction: 'ascending',
+    key: 'id',
+    displayedData: [],
+  },
+}
+export interface IPost {
+  userId: number
+  id: number
+  title: string
+  body: string
+}
+export interface IStore {
+  displayedData: any
+  searchText: any
+  sortConfig: any
+  data: IPost[]
+}
+export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
+  const response = await axios.get('https://jsonplaceholder.typicode.com/posts')
 
-// const postsSlice = createSlice({
-//   name: 'posts',
-//   initialState,
-//   reducers: {
-//     setData: (state, action: PayloadAction<IPost[]>) => {
-//       state.data = action.payload
-//       state.displayedData = action.payload
-//     },
-//     setSearchText: (state, action: PayloadAction<string>) => {
-//       state.displayedData = state.data.filter(
-//         (item) =>
-//           item.body.includes(action.payload) ||
-//           item.title.includes(action.payload)
-//       )
-//     },
-//     setSortConfig: (
-//       state,
-//       action: PayloadAction<{
-//         key: string
-//         direction: 'ascending' | 'descending'
-//       }>
-//     ) => {
-//       state.sortConfig = action.payload
-//       if (action.payload.key) {
-//         state.displayedData = [...state.displayedData].sort((a, b) => {
-//           if (a[action.payload.key] < b[action.payload.key]) {
-//             return action.payload.direction === 'ascending' ? -1 : 1
-//           }
-//           if (a[action.payload.key] > b[action.payload.key]) {
-//             return action.payload.direction === 'ascending' ? 1 : -1
-//           }
-//           return 0
-//         })
-//       }
-//     },
-//   },
-// })
+  return response.data.map((post: any) => {
+    const { userId, ...rest } = post
+    return rest
+  })
+})
+const postsSlice = createSlice({
+  name: 'posts',
+  initialState,
+  extraReducers: (builder) => {
+    builder.addCase(fetchPosts.fulfilled, (state, action) => {
+      state.data = action.payload
+    })
+  },
+  reducers: {
+    setData: (state, action: PayloadAction<IPost[]>) => {
+      state.displayedData = action.payload
+    },
+    setSearchData: (state, action: PayloadAction<string>) => {
+      state.displayedData = state.data.filter(
+        (item) =>
+          item.body.includes(action.payload) ||
+          item.title.includes(action.payload)
+      )
+    },
+    setSortData: (state, action: PayloadAction<ISetSortDataPayload>) => {
+      state.sortConfig = action.payload
+      if (action.payload.key) {
+        state.displayedData = [...action.payload.displayedData].sort((a, b) => {
+          if (a[action.payload.key] < b[action.payload.key]) {
+            return action.payload.direction === 'ascending' ? -1 : 1
+          }
+          if (a[action.payload.key] > b[action.payload.key]) {
+            return action.payload.direction === 'ascending' ? 1 : -1
+          }
+          return 0
+        })
+      }
+    },
+  },
+})
 
-// export const { setData, setSearchText, setSortConfig } = postsSlice.actions
-// export default postsSlice.reducer
+export const { setData, setSearchData, setSortData } = postsSlice.actions
+export default postsSlice.reducer
