@@ -54,7 +54,7 @@ const postsSlice = createSlice({
       state.displayedData = action.payload
     },
     setSearchData: (state, action: PayloadAction<string>) => {
-      state.displayedData = state.data.filter(
+      state.displayedData = state.displayedData.filter(
         (item) =>
           item.body.includes(action.payload) ||
           item.title.includes(action.payload)

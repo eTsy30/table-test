@@ -43,8 +43,9 @@ export const Table = () => {
   useEffect(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = currentPage * itemsPerPage
+
     dispatch(setData(posts.data.slice(startIndex, endIndex)))
-  }, [currentPage, posts.data])
+  }, [currentPage, posts.data, searchText])
 
   const totalPages = Math.ceil(posts.data.length / itemsPerPage)
 
@@ -53,7 +54,7 @@ export const Table = () => {
   }
 
   const handleSearch = () => {
-    dispatch(setSearchData(searchText))
+    dispatch(setSearchData(searchText.toLowerCase()))
   }
 
   const handleSort = (key: string) => {
@@ -76,7 +77,7 @@ export const Table = () => {
   }
   if (!posts.displayedData) return <View>Loading...</View>
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Поиск"
@@ -87,7 +88,7 @@ export const Table = () => {
         <Button
           title="Search"
           onPress={handleSearch}
-          color={'rgb(128, 128, 128)'}
+          color={'rgb(164, 164, 164)'}
         />
       </View>
       <FlatList
@@ -160,19 +161,24 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     flexDirection: 'row',
     marginBottom: 10,
-    width: '60%',
+    width: '100%',
     padding: 10,
     backgroundColor: 'grey',
   },
   input: {
-    width: '100%',
-    height: 35,
+    width: '60%',
+    height: 25,
     padding: 5,
     color: 'white',
   },
   buttonSearch: {
     backgroundColor: 'rgb(128, 128, 128)',
+  },
+  container: {
+    marginTop: 50,
   },
 })

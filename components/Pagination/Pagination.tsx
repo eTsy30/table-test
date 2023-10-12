@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Button, Text, TouchableOpacity, StyleSheet } from 'react-native'
-
+import { v4 as uuidv4 } from 'uuid'
 interface PaginationProps {
   currentPage: number
   totalPages: number
@@ -42,7 +42,7 @@ const Pagination: React.FC<PaginationProps> = ({
       for (let i = firstPage; i <= lastPage; i++) {
         pageButtons.push(
           <Button
-            key={i}
+            key={uuidv4()}
             title={i.toString()}
             onPress={() => handleGoToPage(i)}
             color={i === currentPage ? 'blue' : undefined}
@@ -57,20 +57,18 @@ const Pagination: React.FC<PaginationProps> = ({
         for (let i = firstPage; i <= pageRangeDisplayed; i++) {
           pageButtons.push(
             <Button
-              key={i}
+              key={uuidv4()}
               title={i.toString()}
               onPress={() => handleGoToPage(i)}
               color={i === currentPage ? 'blue' : undefined}
             />
           )
         }
-        pageButtons.push(<Text key="break">{breakLabel}</Text>)
       } else if (currentPage >= rightOffset) {
-        pageButtons.push(<Text key="break">{breakLabel}</Text>)
         for (let i = lastPage - pageRangeDisplayed + 1; i <= lastPage; i++) {
           pageButtons.push(
             <Button
-              key={i}
+              key={uuidv4()}
               title={i.toString()}
               onPress={() => handleGoToPage(i)}
               color={i === currentPage ? 'blue' : undefined}
@@ -78,7 +76,6 @@ const Pagination: React.FC<PaginationProps> = ({
           )
         }
       } else {
-        pageButtons.push(<Text key="break">{breakLabel}</Text>)
         for (
           let i = currentPage - leftOffset;
           i <= currentPage + leftOffset;
@@ -86,14 +83,13 @@ const Pagination: React.FC<PaginationProps> = ({
         ) {
           pageButtons.push(
             <Button
-              key={i}
+              key={uuidv4()}
               title={i.toString()}
               onPress={() => handleGoToPage(i)}
               color={i === currentPage ? 'blue' : undefined}
             />
           )
         }
-        pageButtons.push(<Text key="break">{breakLabel}</Text>)
       }
     }
 
@@ -107,7 +103,11 @@ const Pagination: React.FC<PaginationProps> = ({
         justifyContent: 'center',
         marginTop: 10,
         alignItems: 'center',
-        gap: 10,
+        gap: 2,
+        marginBottom: 40,
+        width: 'auto',
+        paddingLeft: 40,
+        paddingRight: 40,
       }}
     >
       <TouchableOpacity
@@ -115,7 +115,7 @@ const Pagination: React.FC<PaginationProps> = ({
         onPress={handlePrevPage}
         disabled={currentPage < 2}
       >
-        Назад
+        <Text style={{ color: 'black' }}>Назад</Text>
       </TouchableOpacity>
 
       {currentPage <= firstPage + 2 || (
