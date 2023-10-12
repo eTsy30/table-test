@@ -29,8 +29,8 @@ export interface IPost {
 }
 export interface IStore {
   displayedData: any
-  searchText: any
-  sortConfig: any
+  searchText: string
+  sortConfig: string
   data: IPost[]
 }
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {

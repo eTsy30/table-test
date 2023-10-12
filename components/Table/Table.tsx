@@ -39,7 +39,6 @@ export const Table = () => {
   const itemsPerPage = 10
   const [currentPage, setCurrentPage] = useState(1)
   const [searchText, setSearchText] = useState('')
-  console.log(posts)
 
   useEffect(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -75,7 +74,7 @@ export const Table = () => {
       })
     )
   }
-
+  if (!posts.displayedData) return <View>Loading...</View>
   return (
     <View>
       <View style={styles.searchContainer}>
